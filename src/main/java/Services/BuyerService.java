@@ -1,11 +1,11 @@
 package Services;
 
 import DAO.BuyerDAO;
-import Entity.Buyer;
+import entity.Buyer;
 
 import java.util.List;
 
-public class BuyersService implements Service<Buyer> {
+public class BuyerService implements Service<Buyer> {
 
     private final BuyerDAO buyerDAO = new BuyerDAO();
 

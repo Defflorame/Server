@@ -1,13 +1,11 @@
 package Services;
 
 import DAO.RoleDAO;
-import Entity.Role;
-import Entity.Role;
-import network.Response;
+import entity.Role;
 
 import java.util.List;
 
-public class RolesService implements Service<Role> {
+public class RoleService implements Service<Role> {
 
     private final RoleDAO roleDAO = new RoleDAO();
 

@@ -1,7 +1,7 @@
 package DAO;
 
-import Entity.Role;
-import HSF.HibernateSessionFactory;
+import HSF.SessionConfig;
+import entity.Role;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -12,7 +12,7 @@ public class RoleDAO implements DAO<Role> {
     private final SessionFactory sessionFactory;
 
     public RoleDAO() {
-        this.sessionFactory = HibernateSessionFactory.getInstance().getSessionFactory();
+        this.sessionFactory = SessionConfig.getInstance().getSessionFactory();
     }
 
     @Override

@@ -1,7 +1,5 @@
 package network;
 
-import network.ClientThread;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,7 +9,7 @@ import java.util.List;
 public class Server {
     private static final int PORT_NUMBER = 6666;
     private static ServerSocket serverSocket;
-    private static ClientThread clientHandler;
+    private static ClientHandler clientHandler;
     private static Thread thread;
     private static List<Socket> currentSockets = new ArrayList<>();
 
@@ -30,7 +28,7 @@ public class Server {
             String socketInfo = "Клиент " + socket.getInetAddress() + ":" + socket.getPort() + " подключен.";
             System.out.println(socketInfo);
             currentSockets.add(socket);
-            clientHandler = new ClientThread(socket);
+            clientHandler = new ClientHandler(socket);
             thread = new Thread(clientHandler);
             thread.start();
             System.out.flush();

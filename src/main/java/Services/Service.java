@@ -1,7 +1,5 @@
 package Services;
 
-import Entity.User;
-
 import java.util.List;
 
 public interface Service<T> {

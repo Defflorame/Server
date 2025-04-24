@@ -1,4 +1,4 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,15 +11,17 @@ import java.util.Set;
 @Setter
 @Getter
 @Entity
-@Table(name = "Roles")
+@Table(name = "roles")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id")
     private int roleId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role_name")
     private Enums.Roles roleName;
+
 
     // Связь с таблицей Users
 

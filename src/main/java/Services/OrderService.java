@@ -1,12 +1,11 @@
 package Services;
 
 import DAO.OrderDAO;
-import Entity.Order;
-import Entity.Order;
+import entity.Order;
 
 import java.util.List;
 
-public class OrdersService implements Service<Order> {
+public class OrderService implements Service<Order> {
     private final OrderDAO orderDAO = new OrderDAO();
 
     @Override

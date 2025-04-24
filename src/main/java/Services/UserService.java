@@ -1,11 +1,12 @@
 package Services;
 
 import DAO.UserDAO;
-import Entity.User;
+import entity.User;
+import EntityDTO.UserDTO;
 
 import java.util.List;
 
-public class UsersService implements Service<User> {
+public class UserService implements Service<User> {
 
     private final UserDAO userDAO = new UserDAO();
 
@@ -35,5 +36,17 @@ public class UsersService implements Service<User> {
         return userDAO.findAll();
     }
 
-
+    public UserDTO login(User user)
+    {
+        User user1 = userDAO.login(user);
+        if(user1 != null)
+        {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setUserName(user1.getUserName());
+            userDTO.setPassword(null);
+            userDTO.setRole(user1.getRole().getRoleName());
+            return userDTO;
+        }
+        else return null;
+    }
 }

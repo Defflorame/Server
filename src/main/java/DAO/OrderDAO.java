@@ -1,7 +1,8 @@
 package DAO;
 
-import Entity.Order;
-import HSF.HibernateSessionFactory;
+import HSF.SessionConfig;
+import entity.Order;
+import HSF.SessionConfig;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -12,7 +13,7 @@ public class OrderDAO implements DAO<Order> {
     private final SessionFactory sessionFactory;
 
     public OrderDAO() {
-        this.sessionFactory = HibernateSessionFactory.getInstance().getSessionFactory();
+        this.sessionFactory = SessionConfig.getInstance().getSessionFactory();
     }
 
     @Override

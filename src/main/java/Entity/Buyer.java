@@ -1,4 +1,4 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@Table(name = "Buyers")
+@Table(name = "buyers")
 public class Buyer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

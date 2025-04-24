@@ -1,24 +1,26 @@
-package Entity;
+package entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 
+import java.io.Serializable;
 import java.util.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "Users")
-public class User {
+@Table(name = "users")
+public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private int userId;
+    private Integer userId;
 
-    @Column(name = "username")
+    @Column(name = "username", length = 50, nullable = false)
     private String userName;
 
-    @Column(name = "password")
+    @Column(name = "password", length = 100, nullable = false)
     private String password;
 
 
@@ -43,12 +45,19 @@ public class User {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
         User user = (User) o;
-        return userId == user.userId;
+        return getUserId() != null && Objects.equals(getUserId(), user.getUserId());
     }
+
     @Override
-    public int hashCode() { return Objects.hash(userId); }
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
 }

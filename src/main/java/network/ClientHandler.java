@@ -1,17 +1,21 @@
 package network;
 
 
+import entity.User;
+import EntityDTO.UserDTO;
+import Enums.ResponseStatus;
+import Services.UserService;
 import com.google.gson.Gson;
-import network.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.*;
 
-public class ClientThread implements Runnable {
+import Services.*;
+
+public class ClientHandler implements Runnable {
     private Socket clientSocket;
     private Request request;
     private Response response;
@@ -20,15 +24,15 @@ public class ClientThread implements Runnable {
     private PrintWriter out;
 
 
-    /*private UserService userService = new UserService();
-    private FlightService flightService = new FlightService();
-    private PassengerService passengerService = new PassengerService();
-    private PersonDataService personDataService = new PersonDataService();
-    private RouteService routeService = new RouteService();
-    private UserMarkService userMarkService = new UserMarkService();
-    private AircraftService aircraftService = new AircraftService();*/
+    private UserService userService = new UserService();
+    private RoleService roleService = new RoleService();
+    private OrderService orderService = new OrderService();
+    private Order_ItemService orderItemsService = new Order_ItemService();
+    private ItemService itemService = new ItemService();
+    private BuyerService buyerService = new BuyerService();
 
-    public ClientThread(Socket clientSocket) throws IOException {
+
+    public ClientHandler(Socket clientSocket) throws IOException {
         response = new Response();
         request = new Request();
         this.clientSocket = clientSocket;
@@ -45,7 +49,8 @@ public class ClientThread implements Runnable {
 
                 request = gson.fromJson(message, Request.class);
                 switch (request.getRequestType()) {
-                    case REGISTER: {
+                    case REGISTER:
+                    {
 //                        User user = gson.fromJson(request.getData(), User.class);
 //                        if (userService.findAllEntities().stream().noneMatch(x -> x.getLogin().toLowerCase().equals(user.getLogin().toLowerCase()))) {
 //                            personDataService.saveEntity(user.getPersonData());
@@ -58,19 +63,33 @@ public class ClientThread implements Runnable {
 //                        } else {
 //                            response = new Response(ResponseStatus.ERROR, "Такой пользователь уже существует!", "");
 //                        }
-//                        break;
+                        break;
                     }
-//                    case LOGIN: {
-//                        User requestUser = gson.fromJson(request.getData(), User.class);
-//                        if (userService.findAllEntities().stream().anyMatch(x -> x.getLogin().toLowerCase().equals(requestUser.getLogin().toLowerCase())) && userService.findAllEntities().stream().anyMatch(x -> x.getPassword().equals(requestUser.getPassword()))) {
-//                            User user = userService.findAllEntities().stream().filter(x -> x.getLogin().toLowerCase().equals(requestUser.getLogin().toLowerCase())).findFirst().get();
-//                            user = userService.findEntity(user.getId());
-//                            response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(user));
-//                        } else {
-//                            response = new Response(ResponseStatus.ERROR, "Такого пользователя не существует или неправильный пароль!", "");
-//                        }
-//                        break;
-//                    }
+                    case LOGIN: {
+                        UserDTO requestUser = gson.fromJson(request.getData(), UserDTO.class);
+                        if (requestUser != null) {
+                            System.out.println("Пользователь найден: " + requestUser.getUserName());
+                            response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(requestUser));
+                        } else {
+                            System.out.println("Пользователь не найден.");
+                            response = new Response(ResponseStatus.ERROR, "Такого пользователя не существует или неправильный пароль!", "");
+                        }
+                        User user = new User();
+                        user.setUserName(requestUser.getUserName());
+                        user.setPassword(requestUser.getPassword());
+                        requestUser = userService.login(user);
+                        System.out.println("Ответ на запрос: " + gson.toJson(response));
+                        out.println(gson.toJson(response));
+                        out.flush();
+                        if (requestUser != null) {
+                            response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(requestUser));
+                        }
+                        else
+                        {
+                            response = new Response(ResponseStatus.ERROR, "Такого пользователя не существует или неправильный пароль!", "");
+                        }
+                        break;
+                    }
 //                    case ADD_FLIGHT:
 //                        Flight flight = gson.fromJson(request.getData(), Flight.class);
 //                        routeService.saveEntity(flight.getRoute());

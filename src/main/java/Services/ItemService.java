@@ -1,11 +1,11 @@
 package Services;
 
 import DAO.ItemDAO;
-import Entity.Item;
+import entity.Item;
 
 import java.util.List;
 
-public class ItemsService implements Service<Item> {
+public class ItemService implements Service<Item> {
     private final ItemDAO itemDAO = new ItemDAO();
 
     @Override
