@@ -42,6 +42,7 @@ public class UserService implements Service<User> {
         if(user1 != null)
         {
             UserDTO userDTO = new UserDTO();
+            userDTO.setUserId(user1.getUserId());
             userDTO.setUserName(user1.getUserName());
             userDTO.setPassword(null);
             userDTO.setRole(user1.getRole().getRoleName());
@@ -49,4 +50,15 @@ public class UserService implements Service<User> {
         }
         else return null;
     }
+    public boolean register(User user)
+    {
+        // запрос к БД есть ли такой юзернейм, если нет, то вставить юзернейм, пароль и роль пользователя.
+        if(!userDAO.isUsernameTaken(user.getUserName()))
+        {
+            userDAO.save(user);
+            return true;
+        }
+        return false;
+    }
+
 }

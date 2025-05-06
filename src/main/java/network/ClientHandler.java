@@ -1,6 +1,10 @@
 package network;
 
 
+import EntityDTO.ItemDTO;
+import com.google.gson.reflect.TypeToken;
+import entity.Buyer;
+import entity.Role;
 import entity.User;
 import EntityDTO.UserDTO;
 import Enums.ResponseStatus;
@@ -11,7 +15,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import Services.*;
 
@@ -32,7 +41,8 @@ public class ClientHandler implements Runnable {
     private BuyerService buyerService = new BuyerService();
 
 
-    public ClientHandler(Socket clientSocket) throws IOException {
+    public ClientHandler(Socket clientSocket) throws IOException
+    {
         response = new Response();
         request = new Request();
         this.clientSocket = clientSocket;
@@ -42,106 +52,78 @@ public class ClientHandler implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void run()
+    {
         try {
             while (clientSocket.isConnected()) {
                 String message = in.readLine();
 
                 request = gson.fromJson(message, Request.class);
                 switch (request.getRequestType()) {
-                    case REGISTER:
-                    {
-//                        User user = gson.fromJson(request.getData(), User.class);
-//                        if (userService.findAllEntities().stream().noneMatch(x -> x.getLogin().toLowerCase().equals(user.getLogin().toLowerCase()))) {
-//                            personDataService.saveEntity(user.getPersonData());
-//                            userService.saveEntity(user);
-//                            userService.findAllEntities();
-//                            User returnUser;
-//                            returnUser = userService.findEntity(user.getId());
-//                            returnUser.setUserMarks(null);
-//                            response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(returnUser));
-//                        } else {
-//                            response = new Response(ResponseStatus.ERROR, "Такой пользователь уже существует!", "");
-//                        }
+                    case REGISTER: {
+                        UserDTO requestUser = gson.fromJson(request.getData(), UserDTO.class);
+                        User user = new User();
+                        user.setUserName(requestUser.getUserName());
+                        user.setPassword(requestUser.getPassword());
+
+                        Buyer buyer = new Buyer();
+                        buyer.setBuyerAddress(requestUser.getBuyerDTO().getBuyerAddress());
+                        buyer.setBuyerPhone(requestUser.getBuyerDTO().getBuyerPhone());
+
+                        Role role = roleService.findEntity(2); // Например, id 2 — это ROLE_USER
+                        user.setRole(role);
+
+                        buyer.setUser(user);      // Важно для связи @OneToOne
+                        user.setBuyer(buyer);     // Важно для cascade = ALL
+
+                        if (userService.register(user)) {
+                            response = new Response(ResponseStatus.OK, "Готово!", "");
+                        } else {
+                            response = new Response(ResponseStatus.ERROR, "Имя пользователя занято!", "");
+                        }
                         break;
                     }
                     case LOGIN: {
                         UserDTO requestUser = gson.fromJson(request.getData(), UserDTO.class);
-                        if (requestUser != null) {
-                            System.out.println("Пользователь найден: " + requestUser.getUserName());
-                            response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(requestUser));
-                        } else {
-                            System.out.println("Пользователь не найден.");
-                            response = new Response(ResponseStatus.ERROR, "Такого пользователя не существует или неправильный пароль!", "");
-                        }
+
                         User user = new User();
                         user.setUserName(requestUser.getUserName());
                         user.setPassword(requestUser.getPassword());
+
                         requestUser = userService.login(user);
-                        System.out.println("Ответ на запрос: " + gson.toJson(response));
-                        out.println(gson.toJson(response));
-                        out.flush();
+
                         if (requestUser != null) {
                             response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(requestUser));
-                        }
-                        else
-                        {
+                        } else {
                             response = new Response(ResponseStatus.ERROR, "Такого пользователя не существует или неправильный пароль!", "");
                         }
                         break;
                     }
-//                    case ADD_FLIGHT:
-//                        Flight flight = gson.fromJson(request.getData(), Flight.class);
-//                        routeService.saveEntity(flight.getRoute());
-//                        aircraftService.saveEntity(flight.getAircraft());
-//                        flightService.saveEntity(flight);
-//                        response = new Response(ResponseStatus.OK, "Готово!", "");
-//                        break;
-//                    case DELETE_FLIGHT:
-//                        flight = gson.fromJson(request.getData(), Flight.class);
-//                        flightService.deleteEntity(flight);
-//                        response = new Response(ResponseStatus.OK, "Готово!", "");
-//                        break;
-//                    case GET_FLIGHT:
-//                        flight = gson.fromJson(request.getData(), Flight.class);
-//                        flight = flightService.findEntity(flight.getId());
-//                        response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(flight));
-//                        break;
-//                    case GETALL_FLIGHT:
-//                        List<Flight> flights = new ArrayList<>();
-//                        List<ResultMark> result = calcCondorcet();
-//                        for (ResultMark resultMark :
-//                                result) {
-//                            flights.add(resultMark.getFlight());
-//                        }
-//                        response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(flights));
-//                        break;
-//                    case UPDATE_FLIGHT:
-//                        flight = gson.fromJson(request.getData(), Flight.class);
-//                        routeService.updateEntity(flight.getRoute());
-//                        aircraftService.updateEntity(flight.getAircraft());
-//                        flightService.updateEntity(flight);
-//                        response = new Response(ResponseStatus.OK, "Готово!", "");
-//                        break;
-//                    case UPDATE_MARK:
-//                        UserMark mark = gson.fromJson(request.getData(), UserMark.class);
-//                        userMarkService.updateEntity(mark);
-//                        response = new Response(ResponseStatus.OK, "Готово!", "");
-//                        break;
-//                    case UPDATE_PASSENGER:
-//                        Passenger passenger = gson.fromJson(request.getData(), Passenger.class);
-//                        List<Passenger> passengers = passengerService.findAllEntities();
-//                        if (passengers.stream().anyMatch(x -> x.getPlaceNumber() == passenger.getPlaceNumber() && x.getId() != passenger.getId() && x.getFlight().getId()== passenger.getFlight().getId())) {
-//                            response = new Response(ResponseStatus.ERROR, "Это место уже занято!", "");
-//                            break;
-//                        }
-//                        passengerService.updateEntity(passenger);
-//                        response = new Response(ResponseStatus.OK, "Готово!", "");
-//                        break;
-//                    case CONDORCET:
-//                        result = calcCondorcet();
-//                        response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(result));
-//                        break;
+                    case GET_ALL_ITEMS: {
+                        List<ItemDTO> items;
+                        items = itemService.findAll();
+                        if (items != null) {
+                            response = new Response(ResponseStatus.OK, "Готово!", gson.toJson(items));
+                        } else {
+                            response = new Response(ResponseStatus.ERROR, "Ошибка запроса данных!", "");
+                        }
+                        break;
+                    }
+                    case MAKE_ORDER:
+                    {
+                        Type type = new TypeToken<HashMap<Integer, ArrayList<ItemDTO>>>() {}.getType();
+                        Map<Integer, ArrayList<ItemDTO>> order = new Gson().fromJson(request.getData(), type);
+                        int check = orderService.createOrder(order);
+                        if (check == -1) {
+                            response = new Response(ResponseStatus.ERROR, "На стороне сервера произошла ошибка!", "");
+                        } else if (check == 0){
+                            response = new Response(ResponseStatus.OK, "Были куплены не все товары. Попробуйте позже.", "");
+                        }
+                        else
+                            response = new Response(ResponseStatus.OK, "Заказ был успешно оформлен.", "");
+
+                        break;
+                    }
                 }
                 out.println(gson.toJson(response));
                 out.flush();

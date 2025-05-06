@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.io.Serializable;
 import java.util.*;
 @Setter
 @Getter

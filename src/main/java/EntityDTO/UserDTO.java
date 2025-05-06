@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class UserDTO {
     private int userId;
     private String userName;
@@ -20,4 +21,12 @@ public class UserDTO {
         this.userName = userName;
         this.password = password;
     }
+
+    public UserDTO(String userName, String password, BuyerDTO buyerDTO)
+    {
+        this.userName = userName;
+        this.password = password;
+        this.buyerDTO = buyerDTO;
+    }
+
 }

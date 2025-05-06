@@ -59,11 +59,30 @@ public class UserDAO implements DAO<User> {
     public User login(User user)
     {
         try (Session session = sessionFactory.openSession()) {
-            String hql = "FROM User WHERE userName = :username AND password = :password";
-            Query<User> query = session.createQuery(hql, User.class);
-            query.setParameter("username", user.getUserName());
-            query.setParameter("password", user.getPassword());
-            return query.uniqueResult();
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<User> cq = cb.createQuery(User.class);
+            Root<User> root = cq.from(User.class);
+            cq.select(root)
+                    .where(
+                            cb.equal(root.get("userName"), user.getUserName()),
+                            cb.equal(root.get("password"), user.getPassword())
+                    );
+            // Единичный результат: роль подтянется автоматически (еще одним запросом)
+            return session.createQuery(cq).uniqueResult();
         }
     }
+    public boolean isUsernameTaken(String username) {
+        try (Session session = sessionFactory.openSession()) {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> query = cb.createQuery(Long.class);
+            Root<User> root = query.from(User.class);
+
+            query.select(cb.count(root)).where(cb.equal(root.get("userName"), username));
+
+            Long count = session.createQuery(query).getSingleResult();
+            return count != null && count > 0;
+        }
+    }
+
+
 }

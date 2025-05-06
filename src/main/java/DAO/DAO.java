@@ -20,12 +20,17 @@ public interface DAO<T> {
             action.accept(session, obj);
             transaction.commit();
         } catch (Exception e) {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
+            if (transaction != null && transaction.getStatus().canRollback()) {
+                try {
+                    transaction.rollback();
+                } catch (Exception rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                }
             }
-            throw e;
+            throw new RuntimeException("Transaction failed: " + e.getMessage(), e);
         }
     }
+
 
     @FunctionalInterface
     interface TransactionConsumer<T> {

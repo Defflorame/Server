@@ -28,18 +28,17 @@ public class Item {
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Order_Item> orderItems = new HashSet<>();
 
-    // Getters and Setters
     @Override
     public String toString()
     {
-        return name + " - " + price + "₽";
+        return name + " - " + price + "₽ " + count + "штук";
     }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Item item = (Item) o;
-        return itemId == itemId;
+        return itemId == item.itemId;
     }
     @Override
     public int hashCode() { return Objects.hash(itemId); }

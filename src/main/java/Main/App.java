@@ -16,18 +16,6 @@ import java.util.List;
 public class App {
     public static void main(String[] args)
     {
-        SessionFactory factory = SessionConfig.getInstance().getSessionFactory();
-        try (Session session = factory.openSession()) {
-            System.out.println("Hibernate is working!");
-        }
-
-        UserService userService = new UserService();
-        List <User> user = null;
-        user = userService.findAllEntities();
-
-
-
-
 
         try {
             Server.start();
