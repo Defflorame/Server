@@ -2,6 +2,10 @@ package network;
 
 
 import EntityDTO.ItemDTO;
+import EntityDTO.OrderItemInfoDTO;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import entity.Buyer;
 import entity.Role;
@@ -10,13 +14,13 @@ import EntityDTO.UserDTO;
 import Enums.ResponseStatus;
 import Services.UserService;
 import com.google.gson.Gson;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +74,7 @@ public class ClientHandler implements Runnable {
                         buyer.setBuyerAddress(requestUser.getBuyerDTO().getBuyerAddress());
                         buyer.setBuyerPhone(requestUser.getBuyerDTO().getBuyerPhone());
 
-                        Role role = roleService.findEntity(2); // Например, id 2 — это ROLE_USER
+                        Role role = roleService.findEntity(2); // id 2 — это ROLE_USER
                         user.setRole(role);
 
                         buyer.setUser(user);      // Важно для связи @OneToOne
@@ -85,11 +89,9 @@ public class ClientHandler implements Runnable {
                     }
                     case LOGIN: {
                         UserDTO requestUser = gson.fromJson(request.getData(), UserDTO.class);
-
                         User user = new User();
                         user.setUserName(requestUser.getUserName());
                         user.setPassword(requestUser.getPassword());
-
                         requestUser = userService.login(user);
 
                         if (requestUser != null) {
@@ -124,6 +126,22 @@ public class ClientHandler implements Runnable {
 
                         break;
                     }
+                    case GET_ALL_ORDERS_BY_ID:
+                        int id = gson.fromJson(request.getData(), Integer.class);
+                        List<OrderItemInfoDTO> userOrders= orderService.findEntityByUserId(id);
+                        Gson gson1 = new GsonBuilder()
+                                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>)
+                                        (src, typeOfSrc, context) -> new JsonPrimitive(src.toString()))
+                                .create();
+                        if(userOrders != null)
+                        {
+                            response = new Response(ResponseStatus.OK, "", gson1.toJson(userOrders));
+                        }
+                        else
+                        {
+                            response = new Response(ResponseStatus.ERROR, "Заказы пользователя отсутствуют!", "");
+                        }
+                        break;
                 }
                 out.println(gson.toJson(response));
                 out.flush();

@@ -5,6 +5,7 @@ import DAO.OrderDAO;
 import DAO.UserDAO;
 import DAO.ItemDAO;
 import EntityDTO.ItemDTO;
+import EntityDTO.OrderItemInfoDTO;
 import entity.Item;
 import entity.Order;
 import entity.Order_Item;
@@ -45,8 +46,6 @@ public class OrderService implements Service<Order> {
     public List<Order> findAllEntities() {
         return orderDAO.findAll();
     }
-
-
 
     // synchronized???
     public int createOrder(Map<Integer, ArrayList<ItemDTO>> cart) {
@@ -99,16 +98,19 @@ public class OrderService implements Service<Order> {
                 System.out.println("Недостаточно товара!");
             }
         }
-
         if (orderItems.isEmpty()) {
             System.out.println("Невозможно создать заказ — нет подходящих товаров.");
             return -1;
         }
-
         order.setOrderItems(orderItems);
         orderDAO.save(order);
         if(check == items.size()) return 1;
         else return 0;
+    }
+
+    public List<OrderItemInfoDTO> findEntityByUserId(int userId)
+    {
+        return orderDAO.findByUserId(userId);
     }
 
 }

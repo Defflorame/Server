@@ -1,8 +1,16 @@
 package DAO;
 
+import EntityDTO.OrderItemInfoDTO;
 import HSF.SessionConfig;
+import entity.Item;
 import entity.Order;
 import HSF.SessionConfig;
+import entity.Order_Item;
+import entity.User;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -45,6 +53,31 @@ public class OrderDAO implements DAO<Order> {
             return query.list();
         }
     }
+
+    public List<OrderItemInfoDTO> findByUserId(int userId) {
+        try (Session session = sessionFactory.openSession()){
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<OrderItemInfoDTO> query = cb.createQuery(OrderItemInfoDTO.class);
+
+            Root<Order> orderRoot = query.from(Order.class);
+            Join<Order, Order_Item> orderItemJoin = orderRoot.join("orderItems");
+            Join<Order_Item, Item> itemJoin = orderItemJoin.join("item");
+
+            query.select(cb.construct(
+                    OrderItemInfoDTO.class,
+                    orderRoot.get("orderDate"),
+                    itemJoin.get("name"),
+                    itemJoin.get("price"),
+                    orderItemJoin.get("itemCount")
+            ));
+
+            query.where(cb.equal(orderRoot.get("user").get("userId"), userId));
+
+            return session.createQuery(query).getResultList();
+        }
+    }
+
+
 
 
 }
